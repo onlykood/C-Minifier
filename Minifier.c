@@ -40,18 +40,27 @@ char* file_read(char* filepath)
 // Remove inline and multi-line C-style comments
 char* remove_comments(char* buffer)
 {
-    char* new_buffer = (char*)malloc(sizeof(char) * (strlen(buffer) + 1));
+    char* new_buffer = (char*)malloc(strlen(buffer) + 1);
     if (new_buffer == NULL) {
         printf("Error: Memory allocation failed\n");
         exit(1);
     }
 
-    int i = 0;
-    int j = 0;
+    int i = 0, j = 0;
     while (buffer[i] != '\0') {
+
+        if (buffer[i] == '\"') {
+            do {
+                new_buffer[j++] = buffer[i++];
+            } while (buffer[i] != '\"');
+            new_buffer[j++] = buffer[i++];
+        }
+
         if (buffer[i] == '/' && buffer[i + 1] == '/') {
             while (buffer[i] != '\n') {
-                i++;
+                if (buffer[i++] == '\\') {
+                    i ++;
+                }
             }
         }
         else if (buffer[i] == '/' && buffer[i + 1] == '*') {
@@ -62,13 +71,11 @@ char* remove_comments(char* buffer)
             i += 2;
         }
         else {
-            new_buffer[j] = buffer[i];
-            j++;
-            i++;
+            new_buffer[j++] = buffer[i++];
         }
     }
     new_buffer[j] = '\0';
-    return(new_buffer);
+    return (new_buffer);
 }
 
 // Minify C code
